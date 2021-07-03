@@ -9,7 +9,8 @@ notification from mailbox usin SORACOM funk
 - requests==2.25.1
 
 ## Platform
-- SORACOM funk
+- [SORACOM LTE-M Button Plus](https://soracom.jp/store/5207/)
+- [SORACOM funk](https://soracom.jp/services/funk/)
 - GCP Cloud Functions
 - Slack
 - LINE
@@ -20,6 +21,12 @@ write [env.yaml](./env.yaml)
 - `SLACK_TOKEN`
 - `SLACK_CHANNEL`
 - `LINE_ACCESS_TOKEN`
+
+### How To Get SLACK_TOKEN
+- https://www.whizz-tech.co.jp/5857/
+
+### How To Get LINE_ACCESS_TOKEN
+- https://rooter.jp/web-crawling/line-notify_with_python/
 
 # Deploy
 ```Shell
