@@ -32,7 +32,7 @@ def notify_from_mailbox(request):
                     "username": "ポスト投函通知",
                     "text": f"<!channel> {notify_message}"}
 
-    slack_res = requests.post('https://slack.com/api/chat.postMessage', data=slack_payload)
+    # slack_res = requests.post('https://slack.com/api/chat.postMessage', data=slack_payload)
 
     # LINEへ通知
     headers = {
@@ -45,4 +45,5 @@ def notify_from_mailbox(request):
 
     line_res = requests.post("https://notify-api.line.me/api/notify", headers=headers, files=files)
 
-    return {"slack": slack_res.json(), "line": line_res.json()}
+    # return {"slack": slack_res.json(), "line": line_res.json()}
+    return {"line": line_res.json()}
