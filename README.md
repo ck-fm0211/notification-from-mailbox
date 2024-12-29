@@ -3,7 +3,7 @@ notification from mailbox usin SORACOM funk
 
 # Requirement
 ## Runtime
-- Python3.9.5
+- Python3.12.8
 
 ## Library
 - requests==2.25.1
@@ -11,16 +11,14 @@ notification from mailbox usin SORACOM funk
 ## Platform
 - [SORACOM LTE-M Button Plus](https://soracom.jp/store/5207/)
 - [SORACOM funk](https://soracom.jp/services/funk/)
-- GCP Cloud Functions
-- Slack
-- LINE
+- Google Cloud Cloud Run Functions
+- LINE Messaging API
 
 # Usage
 ## Environment
 write [env.yaml](./env.yaml)
-- `SLACK_TOKEN`
-- `SLACK_CHANNEL`
-- `LINE_ACCESS_TOKEN`
+- `LINE_CHANNEL_ACCESS_TOKEN`
+- `LINE_GROUP_ID`
 
 ### How To Get SLACK_TOKEN
 - https://www.whizz-tech.co.jp/5857/
@@ -33,7 +31,7 @@ write [env.yaml](./env.yaml)
 FUNCTION_NAME=notify_from_mailbox
 gcloud functions deploy ${FUNCTION_NAME} \
 --region asia-northeast1 \
---runtime python39 \
+--runtime python312 \
 --trigger-http \
 --allow-unauthenticated \
 --env-vars-file=env.yaml \
@@ -47,14 +45,13 @@ using [functions_framework](https://cloud.google.com/functions/docs/running/func
 pip install functions_framework
 
 # execute
-SLACK_CHANNEL=xxx \
-SLACK_TOKEN=xxx \
-LINE_ACCESS_TOKEN=xxx \
+LINE_CHANNEL_ACCESS_TOKEN=xxx \
+LINE_GROUP_ID=xxx \
 functions_framework --target=notify_from_mailbox
 
 # other window
 curl -X POST -H 'Content-Type: application/json' \
--d '{"clickType": 3,"batteryLevel":1}}' \
+-d '{"clickType": 3,"batteryLevel":1}' \
 "http://localhost:8080"
 ```
 
@@ -88,3 +85,55 @@ https://users.soracom.io/ja-jp/guides/iot-devices/lte-m-button-enterprise/device
 - 0.5
 - 0.75
 - 1.0
+
+# LINE Messaging API
+## Getting User ID (or Group ID)
+
+- Deploy the following JavaScript code as a web application using Google Apps Script, and register it as a webhook in the LINE Developers console.
+- Send a message from LINE and identify the User ID or Group ID included in the response.
+
+```javascript
+// LINE Messaging API Channel Access Token
+var ACCESS_TOKEN = 'xxx';
+
+function doPost(e) {
+  console.log(e)
+  var event = JSON.parse(e.postData.contents).events[0];
+
+  var replyToken = event.replyToken;
+
+  var type = event.source.type;
+
+  if (type == 'user') {
+    var id = event.source.userId;
+  } else if (type == 'group') {
+    var id = event.source.groupId;
+  } else if (type == 'room') {
+    var id = event.source.roomId;
+  }
+
+  var url = 'https://api.line.me/v2/bot/message/reply';
+
+  var payload = {
+    'replyToken': replyToken,
+    'messages': [
+      {
+        'type': 'text',
+        'text': type + '_id = '+ id
+      }
+    ]
+  };
+
+  var options = {
+    'method': 'post',
+    'headers': {
+      'Content-Type': 'application/json; charset=UTF-8',
+      'Authorization': 'Bearer ' + ACCESS_TOKEN,
+    },
+    'payload' : JSON.stringify(payload)
+  };
+
+  UrlFetchApp.fetch(url, options)
+}
+
+```
